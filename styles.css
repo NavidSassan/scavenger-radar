@@ -219,6 +219,26 @@ button.secondary {
   font-variant-numeric: tabular-nums;
   color: var(--amber);
   text-shadow: 0 0 16px rgba(255, 176, 46, 0.4);
+  pointer-events: auto; /* tappable to toggle diagnostics */
+  cursor: pointer;
+}
+
+#debug {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  left: calc(12px + env(safe-area-inset-left));
+  z-index: 20;
+  margin: 0;
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--green);
+  background: rgba(5, 7, 10, 0.7);
+  border: 1px solid var(--green-dim);
+  border-radius: 4px;
+  white-space: pre;
+  pointer-events: none;
 }
 
 #status-line {

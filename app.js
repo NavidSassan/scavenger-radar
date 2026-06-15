@@ -73,11 +73,19 @@ let heading = null;        // smoothed compass heading, degrees
 let headingAvailable = false;
 let geoWatchId = null;
 let rafId = null;
+let absoluteEvent = false; // true if subscribed to deviceorientationabsolute
+let lastAlpha = null;      // raw alpha of the last orientation sample (diagnostics)
+let lastAbsolute = false;  // whether that sample was north-referenced
 
 function compassHeadingFromEvent(e) {
-  // iOS exposes a ready-made compass heading.
+  // iOS exposes a ready-made, north-referenced compass heading.
   if (typeof e.webkitCompassHeading === 'number') return e.webkitCompassHeading;
   if (typeof e.alpha !== 'number') return null;
+  // `360 - alpha` is only a real compass heading when alpha is north-referenced.
+  // Trust it only for the absolute event, or when the sample flags absolute:true.
+  // Otherwise the zero is arbitrary and the radar would point at a constant
+  // wrong offset, so we report no heading and fall back to North-up.
+  if (!absoluteEvent && e.absolute !== true) return null;
   // Absolute orientation: alpha is counter-clockwise from north, so the
   // direction the top of the device points is (360 - alpha).
   let h = 360 - e.alpha;
@@ -87,6 +95,8 @@ function compassHeadingFromEvent(e) {
 }
 
 function onOrientation(e) {
+  lastAlpha = typeof e.alpha === 'number' ? e.alpha : null;
+  lastAbsolute = absoluteEvent || e.absolute === true;
   const h = compassHeadingFromEvent(e);
   if (h == null) return;
   headingAvailable = true;
@@ -118,10 +128,13 @@ function startSensors() {
     { enableHighAccuracy: true, maximumAge: 1000, timeout: 27000 }
   );
 
-  // Prefer the absolute (true-north referenced) event; fall back to relative.
+  // Prefer the absolute (true-north referenced) event. Some browsers (e.g.
+  // Firefox) only fire 'deviceorientation' but still flag it absolute:true.
   if ('ondeviceorientationabsolute' in window) {
+    absoluteEvent = true;
     window.addEventListener('deviceorientationabsolute', onOrientation);
   } else {
+    absoluteEvent = false;
     window.addEventListener('deviceorientation', onOrientation);
   }
 }
@@ -202,6 +215,28 @@ const canvas = document.getElementById('radar-canvas');
 const ctx = canvas.getContext('2d');
 const distanceEl = document.getElementById('distance-readout');
 const statusEl = document.getElementById('status-line');
+const debugEl = document.getElementById('debug');
+
+// Tap the distance readout to toggle the diagnostics overlay.
+let debugVisible = false;
+distanceEl.addEventListener('click', () => {
+  debugVisible = !debugVisible;
+  debugEl.hidden = !debugVisible;
+});
+
+function updateDebug(dist, bearing, useHeading) {
+  if (!debugVisible) return;
+  const fmt = (n, d = 0) => (n == null ? '—' : n.toFixed(d));
+  debugEl.textContent = [
+    `pos   ${fmt(position && position.lat, 5)}, ${fmt(position && position.lon, 5)}`,
+    `acc   ${fmt(position && position.accuracy)} m`,
+    `tgt   ${fmt(config.lat, 5)}, ${fmt(config.lon, 5)}`,
+    `dist  ${fmt(dist)} m`,
+    `bear  ${fmt(bearing)}°`,
+    `head  ${useHeading ? fmt(heading) + '°' : 'n/a (North-up)'}`,
+    `alpha ${fmt(lastAlpha)}  abs ${lastAbsolute}`,
+  ].join('\n');
+}
 
 let lastStatus = '';
 function setStatus(text) {
@@ -253,6 +288,7 @@ function drawRadar() {
     setStatus('Acquiring satellites…');
     distanceEl.textContent = '--';
     latestDistance = null;
+    updateDebug(null, null, headingAvailable && heading != null);
     return;
   }
 
@@ -267,6 +303,8 @@ function drawRadar() {
   const useHeading = headingAvailable && heading != null;
   const screenAngleDeg = useHeading ? bearing - heading : bearing;
   const angle = toRad(screenAngleDeg);
+
+  updateDebug(dist, bearing, useHeading);
 
   const r = Math.min(dist / (config.range || DEFAULT_RANGE), 1) * radarRadius;
   const dotX = cx + r * Math.sin(angle);

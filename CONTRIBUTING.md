@@ -62,6 +62,14 @@ In `app.js`:
   heading. Absolute orientation reports `alpha` counter-clockwise from north, so
   the heading of the device top is `360 - alpha`, adjusted by
   `screen.orientation.angle`. iOS `webkitCompassHeading` is used directly if present.
+  `360 - alpha` is only valid when the data is **north-referenced**, so the
+  function returns `null` unless we subscribed to `deviceorientationabsolute`
+  (`absoluteEvent`) or the sample carries `absolute: true`. Relative orientation
+  has an arbitrary zero, which would rotate the whole radar by a constant offset;
+  rejecting it makes the app fall back to the honest North-up mode instead.
+  Note: projecting the top axis onto the horizontal plane works out to
+  `360 - alpha` independent of forward tilt, so holding the phone angled is fine;
+  it only degrades when held near-vertical.
 - Heading is low-pass filtered (`onOrientation`) to tame compass jitter,
   handling the 0/360 wrap.
 - Draw: screen angle = `bearing - heading` (heading-up). Dot at
@@ -90,6 +98,11 @@ Access codes are compared case-insensitively and trimmed (`normalize()`).
 
 Admin entry points: long-press the word "Targeting" on the gate (1.2 s) or load
 with `#admin`.
+
+Diagnostics: tap the distance readout on the radar to toggle an overlay showing
+GPS position + accuracy, target, distance, bearing, smoothed heading, and the
+raw `alpha` / `absolute` flag. Use it to check the bearing against a real compass
+and to see whether the device delivers north-referenced orientation.
 
 ## Build version stamp
 
