@@ -43,6 +43,10 @@ jobs:
             icons \
             _site/
 
+      - name: Stamp build version
+        # Replace the "dev" placeholder in the footer with the short commit SHA.
+        run: sed -i "s|>dev</footer>|>${GITHUB_SHA:0:7}</footer>|" _site/index.html
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 

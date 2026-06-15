@@ -41,6 +41,9 @@ The hunt is built around phones the organizer hands out.
 
 After setup you can put the phone in airplane mode; GPS and compass still work.
 
+The small footer at the bottom shows the running build's short commit SHA.
+Compare it to the latest commit to confirm a phone has picked up an update.
+
 ## Limitations (be honest with players)
 
 - Phone compass is jittery and may need a figure-8 calibration wave.

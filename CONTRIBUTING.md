@@ -91,6 +91,19 @@ Access codes are compared case-insensitively and trimmed (`normalize()`).
 Admin entry points: long-press the word "Targeting" on the gate (3 s) or load
 with `#admin`.
 
+## Build version stamp
+
+The footer shows the running build. `index.html` ships the literal text `dev`;
+the deploy workflow's "Stamp build version" step replaces it with the short
+commit SHA (`sed` on `_site/index.html`). Locally it just reads `dev`.
+
+Because the stamp lives in `index.html`, which the service worker serves
+cache-first, the footer reflects the build **actually loaded on the device** (the
+cached one), not necessarily the latest deploy. That makes it a reliable way to
+confirm whether a phone has picked up an update: compare the footer SHA to the
+latest commit. To make a phone fetch newer HTML at all, the SW must update, so
+remember to bump `CACHE_VERSION` (see below).
+
 ## Service worker / releases
 
 `service-worker.js` pre-caches the asset list and serves cache-first.

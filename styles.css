@@ -41,6 +41,21 @@ body::before {
   background-repeat: no-repeat;
 }
 
+/* Build stamp */
+#version {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(3px + env(safe-area-inset-bottom));
+  z-index: 5;
+  pointer-events: none;
+  text-align: center;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: var(--text);
+  opacity: 0.3;
+}
+
 /* CRT scanlines + flicker */
 #crt {
   position: fixed;
