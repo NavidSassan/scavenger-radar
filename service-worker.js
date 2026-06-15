@@ -1,7 +1,7 @@
 'use strict';
 
 // Bump CACHE_VERSION on any change to the cached files to force an update.
-const CACHE_VERSION = 'scavenger-radar-v4';
+const CACHE_VERSION = 'scavenger-radar-v5';
 const ASSETS = [
   '.',
   'index.html',
@@ -18,6 +18,11 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_VERSION).then((cache) => cache.addAll(ASSETS))
   );
   self.skipWaiting();
+});
+
+// Let a waiting worker activate on demand (manual update from the footer tap).
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 // Drop old caches when a new version activates.

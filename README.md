@@ -44,6 +44,11 @@ After setup you can put the phone in airplane mode; GPS and compass still work.
 The small footer at the bottom shows the running build's short commit SHA.
 Compare it to the latest commit to confirm a phone has picked up an update.
 
+To update an installed phone without reinstalling: connect it to internet and
+**tap the footer**. If a newer build is deployed, the app reloads onto it; if it
+is already current, nothing changes. Do updates at home before the hunt, not in
+the field.
+
 ## Limitations (be honest with players)
 
 - Phone compass is jittery and may need a figure-8 calibration wave.

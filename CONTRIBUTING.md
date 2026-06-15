@@ -113,6 +113,18 @@ remember to bump `CACHE_VERSION` (see below).
 new version on next load. If you add or rename a file, also update the `ASSETS`
 list.
 
+### Updating an installed phone
+
+Caching is cache-first, so a plain reload keeps serving the cached build (and an
+installed Android PWA usually resumes rather than reloads, so updates do not land
+on their own). The footer is a manual update control: tapping it runs
+`checkForUpdate()` in `app.js`, which calls `registration.update()`. If
+`CACHE_VERSION` changed, the new worker installs, `skipWaiting()` +
+`clients.claim()` activate it, the `controllerchange` event fires, and the page
+reloads onto the fresh cache. A `SKIP_WAITING` message handler in the worker
+covers the already-waiting case. Offline or already-current taps just restore the
+footer label. This needs internet, so update phones before heading out.
+
 ## Icons
 
 Generated with Pillow:

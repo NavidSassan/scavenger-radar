@@ -470,7 +470,57 @@ if (location.hash === '#admin') openAdmin();
 
 showView('gate');
 
+// --- Service worker + manual update ----------------------------------------
+// Caching is cache-first (instant, offline-safe), so a normal reload keeps
+// serving the cached build. Tapping the footer forces an update check: if a
+// newer build is deployed, its service worker activates and the page reloads
+// onto it. Offline or already-current taps simply restore the label.
+
+const versionEl = document.getElementById('version');
+const versionLabel = versionEl.textContent;
+let updateRequested = false;
+let updateReloading = false;
+
+function reloadOnControllerChange() {
+  if (updateRequested && !updateReloading) {
+    updateReloading = true;
+    location.reload();
+  }
+}
+
+async function checkForUpdate() {
+  if (updateReloading) return;
+  if (!('serviceWorker' in navigator)) {
+    location.reload();
+    return;
+  }
+  updateRequested = true;
+  versionEl.textContent = 'updating…';
+  const reg = await navigator.serviceWorker.getRegistration();
+  if (!reg) {
+    location.reload();
+    return;
+  }
+  try {
+    await reg.update();
+  } catch (e) {
+    /* offline or fetch failed: nothing newer to load */
+  }
+  // Nudge an already-waiting worker to take over.
+  if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  // No new version activated within a few seconds: restore the label.
+  setTimeout(() => {
+    if (!updateReloading) {
+      updateRequested = false;
+      versionEl.textContent = versionLabel;
+    }
+  }, 3000);
+}
+
+versionEl.addEventListener('click', checkForUpdate);
+
 if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', reloadOnControllerChange);
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('service-worker.js').catch(() => {
       /* offline caching simply unavailable; app still works online */
