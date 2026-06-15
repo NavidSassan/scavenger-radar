@@ -1,0 +1,56 @@
+name: Deploy to GitHub Pages
+
+# Static-site deploy via the GitHub Pages Actions pipeline (no Jekyll).
+# Enable once in repo Settings -> Pages -> Build and deployment -> Source:
+# "GitHub Actions". Every push to main then publishes automatically.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one in-flight deploy at a time; newer pushes supersede older ones.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assemble site
+        # Copy only the deployable app files into _site so .git, docs, and
+        # workflow files are never published. Add new assets to this list.
+        run: |
+          mkdir -p _site
+          cp -r \
+            index.html \
+            styles.css \
+            app.js \
+            manifest.webmanifest \
+            service-worker.js \
+            icons \
+            _site/
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

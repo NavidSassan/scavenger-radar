@@ -24,6 +24,7 @@ away after the first visit.
 | `manifest.webmanifest`   | PWA metadata (name, icons, standalone display).                |
 | `service-worker.js`      | Cache-first offline shell.                                     |
 | `icons/`                 | 192px + 512px PWA icons (generated, see below).                |
+| `.github/workflows/deploy.yml` | GitHub Pages deploy pipeline.                            |
 
 `app.js` is organized into labelled sections: config persistence, view
 switching, geometry, sensors, proximity beeper, radar rendering, gate, admin,
@@ -111,6 +112,28 @@ PY
 To change the look, regenerate both sizes and keep the filenames
 (`icons/icon-192.png`, `icons/icon-512.png`) referenced by the manifest and
 service worker.
+
+## Deployment
+
+`.github/workflows/deploy.yml` deploys to GitHub Pages on every push to `main`
+(and via manual `workflow_dispatch`). It uses the Pages Actions pipeline
+(`configure-pages` -> `upload-pages-artifact` -> `deploy-pages`), so **no Jekyll
+runs** and files are served exactly as uploaded.
+
+The workflow copies only the app files into a `_site/` directory before
+uploading, so `.git`, the docs, and the workflow itself are never published.
+
+**When you add or rename an app asset, update the `cp` list in the "Assemble
+site" step** so it ships, and keep the service-worker `ASSETS` list in sync (and
+bump `CACHE_VERSION`). The two lists should match the real set of runtime files.
+
+One-time repo setup: Settings -> Pages -> Build and deployment -> Source ->
+GitHub Actions. The site then serves at `https://<user>.github.io/<repo>/`.
+Because every asset path in `index.html`, the manifest, and the service-worker
+registration is relative, the app works unchanged under that subpath.
+
+To deploy elsewhere (Cloudflare Pages, Netlify, a plain server), just publish the
+same app files over HTTPS; the workflow is GitHub-specific but the app is not.
 
 ## Theming notes
 

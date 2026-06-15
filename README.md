@@ -50,14 +50,30 @@ After setup you can put the phone in airplane mode; GPS and compass still work.
 
 ## Deployment
 
-Any static HTTPS host works (HTTPS is required for GPS, compass, and offline
-install):
+HTTPS is required (for GPS, compass, and offline install). There is no build
+step; the files in this folder are the whole app.
 
-- GitHub Pages, Cloudflare Pages, or Netlify: push these files, point the host
-  at the repo root.
-- Or any web server serving the files over HTTPS.
+### GitHub Pages (recommended, automated)
 
-There is no build step. The files in this folder are the whole app.
+A workflow at `.github/workflows/deploy.yml` publishes the app on every push to
+`main`.
+
+1. Push this repo to GitHub.
+2. In **Settings -> Pages -> Build and deployment**, set **Source** to
+   **GitHub Actions** (one-time).
+3. Push to `main` (or run the workflow manually from the Actions tab). The app
+   goes live at `https://<user>.github.io/<repo>/`.
+
+All asset paths are relative, so it works under that `/<repo>/` subpath with no
+extra configuration.
+
+### Other hosts
+
+Any static HTTPS host works too (Cloudflare Pages, Netlify, or any web server):
+serve the app files from a directory over HTTPS.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how the deploy workflow is built and
+what to update when adding files.
 
 ## Developer docs
 
