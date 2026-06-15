@@ -445,10 +445,10 @@ soundToggle.addEventListener('click', () => {
   }
 });
 
-// Hidden admin entry: long-press the word "Targeting" for 3s, or load with #admin.
+// Hidden admin entry: long-press the word "Targeting" for 1.2s, or load with #admin.
 // Note: no touchmove cancel, so small finger jitter during the hold is tolerated.
 const adminTrigger = document.getElementById('admin-trigger');
-const ADMIN_HOLD_MS = 3000;
+const ADMIN_HOLD_MS = 1200;
 let pressTimer = null;
 function armLongPress() {
   pressTimer = setTimeout(openAdmin, ADMIN_HOLD_MS);

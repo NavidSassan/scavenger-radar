@@ -88,7 +88,7 @@ Config lives in `localStorage` under `scavenger-radar-config`:
 `{ lat, lon, word1, word2, range }`. The admin screen reads and writes it.
 Access codes are compared case-insensitively and trimmed (`normalize()`).
 
-Admin entry points: long-press the word "Targeting" on the gate (3 s) or load
+Admin entry points: long-press the word "Targeting" on the gate (1.2 s) or load
 with `#admin`.
 
 ## Build version stamp
