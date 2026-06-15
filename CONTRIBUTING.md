@@ -1,0 +1,136 @@
+# Developer docs
+
+## Overview
+
+Static, dependency-free PWA. Plain HTML + CSS + vanilla JS + Canvas. No build
+step, no framework, no backend. The whole app is the files in this folder.
+
+Everything the radar needs runs on the device:
+
+- **GPS**: `navigator.geolocation.watchPosition` (no internet required).
+- **Compass**: `deviceorientationabsolute` / `deviceorientation` events.
+- **Audio**: Web Audio API oscillator for the proximity beep.
+
+The only internet touch is the initial load, which the service worker caches
+away after the first visit.
+
+## File map
+
+| File                     | Purpose                                                        |
+| ------------------------ | -------------------------------------------------------------- |
+| `index.html`             | App shell. Three `<section>` views: gate, radar, admin.        |
+| `styles.css`             | Star-Wars targeting-computer theme (starfield, CRT, colours).  |
+| `app.js`                 | All logic: state, gate, sensors, radar math, beeper, admin.    |
+| `manifest.webmanifest`   | PWA metadata (name, icons, standalone display).                |
+| `service-worker.js`      | Cache-first offline shell.                                     |
+| `icons/`                 | 192px + 512px PWA icons (generated, see below).                |
+
+`app.js` is organized into labelled sections: config persistence, view
+switching, geometry, sensors, proximity beeper, radar rendering, gate, admin,
+sound toggle, boot.
+
+## Local development
+
+GPS, compass, Web Audio, and service workers all require a **secure context**.
+`localhost` counts as secure, so a plain local server is enough for most testing:
+
+```sh
+python3 -m http.server 8000
+# then open http://localhost:8000 on the dev machine
+```
+
+To test on a real phone you need HTTPS (or `localhost` forwarded), because the
+phone is not on `localhost`. Options:
+
+- Reverse tunnel (e.g. `cloudflared tunnel --url http://localhost:8000`) gives a
+  temporary HTTPS URL.
+- Chrome remote debugging: `chrome://inspect` with port-forwarding maps the
+  phone's `localhost:8000` to the dev machine, which keeps it a secure context.
+
+Desktop Chrome DevTools can emulate sensors (Sensors tab: override geolocation
+and orientation) for quick checks without a phone, but it cannot fully emulate
+`deviceorientationabsolute`; verify heading behaviour on a real device.
+
+## Radar math
+
+In `app.js`:
+
+- `distanceMeters()` - haversine great-circle distance.
+- `bearingDegrees()` - initial bearing, degrees clockwise from north.
+- `compassHeadingFromEvent()` - turns an orientation event into a compass
+  heading. Absolute orientation reports `alpha` counter-clockwise from north, so
+  the heading of the device top is `360 - alpha`, adjusted by
+  `screen.orientation.angle`. iOS `webkitCompassHeading` is used directly if present.
+- Heading is low-pass filtered (`onOrientation`) to tame compass jitter,
+  handling the 0/360 wrap.
+- Draw: screen angle = `bearing - heading` (heading-up). Dot at
+  `cx + r·sin(angle)`, `cy - r·cos(angle)`. Radius
+  `r = min(distance / range, 1) · radarRadius`.
+- No usable compass: `useHeading` is false, the radar stays North-up and the
+  status line shows the numeric bearing.
+
+## Proximity beeper
+
+`scheduleBeep()` self-reschedules with `setTimeout`. The interval and the
+oscillator frequency are interpolated from `latestDistance / range`:
+
+- Interval: `BEEP_MIN_INTERVAL` (close) … `BEEP_MAX_INTERVAL` (far).
+- Pitch: higher when close.
+
+Web Audio is blocked until a user gesture, so `initAudio()` is called from the
+"Engage" tap (and from the sound toggle). `latestDistance` is updated each frame
+by the draw loop.
+
+## Admin / config
+
+Config lives in `localStorage` under `scavenger-radar-config`:
+`{ lat, lon, word1, word2, range }`. The admin screen reads and writes it.
+Access codes are compared case-insensitively and trimmed (`normalize()`).
+
+Admin entry points: long-press the top-left corner (1.2 s) or load with `#admin`.
+
+## Service worker / releases
+
+`service-worker.js` pre-caches the asset list and serves cache-first.
+
+**When you change any cached file, bump `CACHE_VERSION`** in
+`service-worker.js`. The old cache is deleted on activate, so phones pick up the
+new version on next load. If you add or rename a file, also update the `ASSETS`
+list.
+
+## Icons
+
+Generated with Pillow:
+
+```sh
+python3 - <<'PY'
+# see git history for the generator; draws the radar glyph at 192 and 512 px
+PY
+```
+
+To change the look, regenerate both sizes and keep the filenames
+(`icons/icon-192.png`, `icons/icon-512.png`) referenced by the manifest and
+service worker.
+
+## Theming notes
+
+The Star-Wars feel is CSS-only (starfield via layered radial-gradients, CRT
+scanlines, amber/green/yellow palette, monospace + wide letter-spacing). No font
+files are bundled, so it stays offline-clean. To use a real Star-Wars display
+font, drop a `woff2` into the folder, `@font-face` it in `styles.css`, add the
+file to the service-worker `ASSETS`, and bump `CACHE_VERSION`. Check the font
+licence before shipping.
+
+## Testing checklist
+
+Manual, on a real Android phone (see "Verification" in the plan):
+
+1. Serve over HTTPS (or localhost).
+2. Admin: set a target ~100-150 m away and two access codes.
+3. Gate: wrong codes rejected, correct codes open the radar.
+4. Grant location permission; the dot points at the target, distance is plausible.
+5. Walk toward it: distance drops, dot moves inward, beep speeds up, "target
+   acquired" appears within ~10 m.
+6. Turn on the spot: the dot rotates opposite to your turn (heading-up).
+7. `SND` button mutes/unmutes the beeper.
+8. Airplane mode after install: app still opens and the radar still works.

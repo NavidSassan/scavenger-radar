@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#05070a">
+  <title>Targeting Computer</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Gate: two access codes -->
+  <section id="view-gate" class="view">
+    <div class="gate-box panel">
+      <p class="kicker">Imperial Network</p>
+      <h1 class="title">Targeting<br>Computer</h1>
+      <p class="subtitle">Enter access codes to acquire target</p>
+      <form id="gate-form" autocomplete="off">
+        <input id="word1-input" type="text" inputmode="text" placeholder="Access code 1" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <input id="word2-input" type="text" inputmode="text" placeholder="Access code 2" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <button type="submit">Engage</button>
+      </form>
+      <p id="gate-error" class="error" hidden>Access denied.</p>
+    </div>
+    <!-- Hidden admin trigger: long-press this corner -->
+    <div id="admin-trigger" aria-hidden="true"></div>
+  </section>
+
+  <!-- Radar -->
+  <section id="view-radar" class="view" hidden>
+    <canvas id="radar-canvas"></canvas>
+    <button id="sound-toggle" type="button" aria-label="Toggle sound">SND ON</button>
+    <div id="radar-hud">
+      <div id="distance-readout">--</div>
+      <div id="status-line">Acquiring satellites…</div>
+    </div>
+  </section>
+
+  <!-- Admin: set target + access codes -->
+  <section id="view-admin" class="view" hidden>
+    <div class="admin-box panel">
+      <h1 class="title small">Mission Setup</h1>
+      <p class="hint">On <a href="https://map.geo.admin.ch/" target="_blank" rel="noopener">map.geo.admin.ch</a> click a spot, then copy the <strong>WGS 84</strong> lat/lon values here.</p>
+      <label>Target latitude
+        <input id="admin-lat" type="text" inputmode="decimal" placeholder="47.3769">
+      </label>
+      <label>Target longitude
+        <input id="admin-lon" type="text" inputmode="decimal" placeholder="8.5417">
+      </label>
+      <label>Access code 1
+        <input id="admin-word1" type="text" autocapitalize="none" spellcheck="false">
+      </label>
+      <label>Access code 2
+        <input id="admin-word2" type="text" autocapitalize="none" spellcheck="false">
+      </label>
+      <label>Radar edge distance (m)
+        <input id="admin-range" type="text" inputmode="numeric" placeholder="150">
+      </label>
+      <div class="admin-buttons">
+        <button id="admin-save" type="button">Save</button>
+        <button id="admin-close" type="button" class="secondary">Close</button>
+      </div>
+      <p id="admin-saved" class="ok" hidden>Saved.</p>
+    </div>
+  </section>
+
+  <!-- CRT scanline overlay -->
+  <div id="crt" aria-hidden="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
