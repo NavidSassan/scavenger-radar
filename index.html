@@ -15,7 +15,8 @@
   <section id="view-gate" class="view">
     <div class="gate-box panel">
       <p class="kicker">Imperial Network</p>
-      <h1 class="title">Targeting<br>Computer</h1>
+      <!-- Long-press "Targeting" for 3s to open the admin screen -->
+      <h1 class="title"><span id="admin-trigger">Targeting</span><br>Computer</h1>
       <p class="subtitle">Enter access codes to acquire target</p>
       <form id="gate-form" autocomplete="off">
         <input id="word1-input" type="text" inputmode="text" placeholder="Access code 1" autocomplete="off" autocapitalize="none" spellcheck="false">
@@ -24,8 +25,6 @@
       </form>
       <p id="gate-error" class="error" hidden>Access denied.</p>
     </div>
-    <!-- Hidden admin trigger: long-press this corner -->
-    <div id="admin-trigger" aria-hidden="true"></div>
   </section>
 
   <!-- Radar -->

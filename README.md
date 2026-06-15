@@ -30,8 +30,8 @@ The hunt is built around phones the organizer hands out.
 1. **Host it** (once, ahead of time): see "Deployment" below. You need an HTTPS URL.
 2. **Per phone**: open the URL on wifi or your hotspot, then "Add to Home Screen"
    in Chrome. This caches the app so it works offline afterwards.
-3. **Set the target**: long-press the top-left corner of the start screen (about
-   1 second) to open the setup screen, or append `#admin` to the URL.
+3. **Set the target**: long-press the word **"Targeting"** on the start screen
+   for 3 seconds to open the setup screen, or append `#admin` to the URL.
    - On [map.geo.admin.ch](https://map.geo.admin.ch/) click the target spot and
      copy the **WGS 84** latitude/longitude.
    - Enter lat, lon, the two access codes, and the radar edge distance (the

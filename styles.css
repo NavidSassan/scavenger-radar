@@ -163,14 +163,9 @@ button.secondary {
   75% { transform: translateX(8px); }
 }
 
-/* Hidden admin trigger */
+/* Hidden admin trigger: long-press the word "Targeting" */
 #admin-trigger {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 64px;
-  height: 64px;
-  z-index: 10;
+  -webkit-touch-callout: none;
 }
 
 /* Radar */
