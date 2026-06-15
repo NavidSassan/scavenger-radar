@@ -4,6 +4,8 @@ A Star-Wars-flavoured "targeting computer" for a scavenger hunt. Players enter
 two access codes, then a radar points them toward the next location with a dot
 and a proximity beep that speeds up as they close in.
 
+**Live:** https://navidsassan.github.io/scavenger-radar/
+
 It is a single static web app (PWA). No backend, no accounts. GPS and the phone
 compass work without internet, so once the app is loaded onto a phone it runs
 fully offline in the field.
