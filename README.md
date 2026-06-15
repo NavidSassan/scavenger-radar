@@ -75,6 +75,10 @@ serve the app files from a directory over HTTPS.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how the deploy workflow is built and
 what to update when adding files.
 
+## License
+
+The Unlicense (public domain). See [LICENSE](LICENSE).
+
 ## Developer docs
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for architecture, local development, the
