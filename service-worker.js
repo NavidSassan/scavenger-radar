@@ -1,7 +1,7 @@
 'use strict';
 
 // Bump CACHE_VERSION on any change to the cached files to force an update.
-const CACHE_VERSION = 'scavenger-radar-v6';
+const CACHE_VERSION = 'scavenger-radar-v7';
 const ASSETS = [
   '.',
   'index.html',

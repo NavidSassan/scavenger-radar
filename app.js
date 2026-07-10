@@ -502,6 +502,48 @@ adminTrigger.addEventListener('mousedown', armLongPress);
 adminTrigger.addEventListener('mouseup', cancelLongPress);
 adminTrigger.addEventListener('mouseleave', cancelLongPress);
 
+// --- Config import from a provisioning QR ----------------------------------
+// A QR (see tools/make-qr.sh) encodes the mission config in the URL fragment
+// as #cfg=<base64url JSON>. On first load we decode it into localStorage, then
+// strip the fragment so the access codes do not linger in the address bar or
+// get bookmarked. The fragment stays client-side (never sent to the server);
+// base64url keeps it URL-safe and not human-readable at a glance. This is
+// obfuscation for a scout hunt, not security: a static app hides nothing from
+// someone who decodes the QR.
+
+function base64UrlDecode(s) {
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  return atob(s);
+}
+
+function importConfigFromHash() {
+  const prefix = '#cfg=';
+  if (!location.hash.startsWith(prefix)) return;
+  try {
+    const incoming = JSON.parse(base64UrlDecode(location.hash.slice(prefix.length)));
+    const lat = parseFloat(incoming.lat);
+    const lon = parseFloat(incoming.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const range = parseInt(incoming.range, 10);
+    config = {
+      lat,
+      lon,
+      word1: typeof incoming.word1 === 'string' ? incoming.word1.trim() : '',
+      word2: typeof incoming.word2 === 'string' ? incoming.word2.trim() : '',
+      range: Number.isFinite(range) && range > 0 ? range : DEFAULT_RANGE,
+    };
+    saveConfig(config);
+  } catch (e) {
+    /* malformed payload: keep any stored/admin config instead */
+  } finally {
+    // Drop the fragment whether or not it parsed, so codes are not left in the URL.
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+}
+
+importConfigFromHash();
+
 if (location.hash === '#admin') openAdmin();
 
 // --- Boot ------------------------------------------------------------------

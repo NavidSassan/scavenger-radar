@@ -32,6 +32,8 @@ The hunt is built around phones the organizer hands out.
    in Chrome. This caches the app so it works offline afterwards.
 3. **Set the target**: long-press the word **"Targeting"** on the start screen
    for 1.2 seconds to open the setup screen, or append `#admin` to the URL.
+   Or skip this per-phone step and provision by QR code (see below).
+
    - On [map.geo.admin.ch](https://map.geo.admin.ch/) click the target spot and
      copy the **WGS 84** latitude/longitude.
    - Enter lat, lon, the two access codes, and the radar edge distance (the
@@ -40,6 +42,28 @@ The hunt is built around phones the organizer hands out.
 4. **Hand out the phone.** Players enter the access codes and follow the radar.
 
 After setup you can put the phone in airplane mode; GPS and compass still work.
+
+### Provision with a QR code
+
+Instead of typing the target and codes into the admin screen on every phone,
+generate one QR that carries the whole config and scan it on each phone:
+
+```sh
+./tools/make-qr.sh <lat> <lon> <code1> <code2> --range 150 --out /tmp/qrcode.png
+```
+
+Scanning the QR opens the app, stores the target and codes on that phone, and
+clears them from the address bar. Players still enter the two codes at the gate
+(they find the code words as physical clues), so a scan does not skip the
+puzzle. The config travels in the URL fragment and never reaches a server; one
+scan is enough, after which the phone works offline.
+
+The script needs the `qrencode` package. It is a local tool and is not part of
+the deployed app.
+
+Note: a static app cannot keep a secret, so the QR is not secure. base64url
+makes the payload non-obvious, but anyone who decodes the QR can read the target
+and codes. Fine for a scout hunt; do not rely on it as security.
 
 The small footer at the bottom shows the running build's short commit SHA.
 Compare it to the latest commit to confirm a phone has picked up an update.
